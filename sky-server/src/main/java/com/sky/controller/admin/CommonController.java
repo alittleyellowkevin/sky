@@ -1,5 +1,6 @@
-package com.sky.controller;
+package com.sky.controller.admin;
 
+import com.sky.constant.MessageConstant;
 import com.sky.result.Result;
 import com.sky.utils.AliOssUtil;
 import io.swagger.annotations.Api;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin/common")
@@ -27,6 +31,19 @@ public class CommonController {
     @ApiOperation("文件上传")
     public Result<String> upload(MultipartFile file){
         log.info("文件上传:{}", file);
-        return null;
+        try{
+            //原始文件名
+            String originFileName = file.getOriginalFilename();
+            //截取拓展名
+            String extention = originFileName.substring(originFileName.lastIndexOf("."));
+            //构造新名字
+            String newFileName = UUID.randomUUID().toString() + extention;
+            String filePath = aliOssUtil.upload(file.getBytes(), newFileName);
+            return Result.success(filePath);
+        } catch (IOException e) {
+              log.error("文件上传失败：{}", e);
+        }
+        return Result.error(MessageConstant.UPLOAD_FAILED);
     }
+
 }

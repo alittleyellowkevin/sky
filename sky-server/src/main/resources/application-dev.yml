@@ -11,3 +11,6 @@ sky:
     access-key-id: LTAI5tFRwUwgAwiHa9VadjxM
     access-key-secret: 2uiG9LfBfKAf2s2tRfOOOoBoFBxVmY
     bucket-name: gulinall-hkw
+  wechat:
+    appid: wxf0364e20f9a9f65a
+    secret: c1ff02f21ce657fbb9a59cef9a7ca2a7
