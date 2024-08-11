@@ -134,7 +134,7 @@ public class WeChatPayUtil {
     private String jsapi(String orderNum, BigDecimal total, String description, String openid) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("appid", weChatProperties.getAppid());
-        jsonObject.put("mchid", weChatProperties.getMchid());
+//        jsonObject.put("mchid", weChatProperties.getMchid());
         jsonObject.put("description", description);
         jsonObject.put("out_trade_no", orderNum);
         jsonObject.put("notify_url", weChatProperties.getNotifyUrl());
@@ -164,45 +164,33 @@ public class WeChatPayUtil {
      * @return
      */
     public JSONObject pay(String orderNum, BigDecimal total, String description, String openid) throws Exception {
-        //统一下单，生成预支付交易单
-        String bodyAsString = jsapi(orderNum, total, description, openid);
-        //解析返回结果
-        JSONObject jsonObject = JSON.parseObject(bodyAsString);
-        System.out.println(jsonObject);
-
-        String prepayId = jsonObject.getString("prepay_id");
-        if (prepayId != null) {
-            String timeStamp = String.valueOf(System.currentTimeMillis() / 1000);
-            String nonceStr = RandomStringUtils.randomNumeric(32);
-            ArrayList<Object> list = new ArrayList<>();
-            list.add(weChatProperties.getAppid());
-            list.add(timeStamp);
-            list.add(nonceStr);
-            list.add("prepay_id=" + prepayId);
-            //二次签名，调起支付需要重新签名
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Object o : list) {
-                stringBuilder.append(o).append("\n");
-            }
-            String signMessage = stringBuilder.toString();
-            byte[] message = signMessage.getBytes();
-
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(PemUtil.loadPrivateKey(new FileInputStream(new File(weChatProperties.getPrivateKeyFilePath()))));
-            signature.update(message);
-            String packageSign = Base64.getEncoder().encodeToString(signature.sign());
-
-            //构造数据给微信小程序，用于调起微信支付
-            JSONObject jo = new JSONObject();
-            jo.put("timeStamp", timeStamp);
-            jo.put("nonceStr", nonceStr);
-            jo.put("package", "prepay_id=" + prepayId);
-            jo.put("signType", "RSA");
-            jo.put("paySign", packageSign);
-
-            return jo;
+        String prepayId = "youarebitch";
+        String timeStamp = String.valueOf(System.currentTimeMillis() / 1000);
+        String nonceStr = RandomStringUtils.randomNumeric(32);
+        ArrayList<Object> list = new ArrayList<>();
+        list.add(weChatProperties.getAppid());
+        list.add(timeStamp);
+        list.add(nonceStr);
+        list.add("prepay_id=" + prepayId);
+        //二次签名，调起支付需要重新签名
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Object o : list) {
+            stringBuilder.append(o).append("\n");
         }
-        return jsonObject;
+        String signMessage = stringBuilder.toString();
+        byte[] message = signMessage.getBytes();
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+
+        //构造数据给微信小程序，用于调起微信支付
+        JSONObject jo = new JSONObject();
+        jo.put("timeStamp", timeStamp);
+        jo.put("nonceStr", nonceStr);
+        jo.put("package", "prepay_id=" + prepayId);
+        jo.put("signType", "RSA");
+        jo.put("paySign", signature);
+
+        return jo;
     }
 
     /**
