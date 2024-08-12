@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.pagehelper.Page;
@@ -16,6 +17,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.*;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,11 +43,12 @@ public class OrderServiceImpl implements OrderService {
     private ShoppingCartMapper shoppingCartMapper;
     @Autowired
     private AddressBookMapper addressBookMapper;
-
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
     /**
      * 用户下单
      *
@@ -120,6 +125,8 @@ public class OrderServiceImpl implements OrderService {
         Long userId = BaseContext.getCurrentId();
         User user = userMapper.getById(userId);
 
+        Orders orders = orderMapper.getByNumber(ordersPaymentDTO.getOrderNumber());
+
         //调用微信支付接口，生成预支付交易单
         JSONObject jsonObject = weChatPayUtil.pay(
                 ordersPaymentDTO.getOrderNumber(), //商户订单号
@@ -143,6 +150,15 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime checkoutTime = LocalDateTime.now();
         orderMapper.updateStatus(Orderstatus, OderPaidStatus, checkoutTime, ordersPaymentDTO.getOrderNumber());
 
+
+        //通过websocket向客户端推送json消息 type orderId content
+        Map map = new HashMap<>();
+        map.put("type", 1); //表示来电提醒
+        map.put("orderId", orders.getId()); //订单id
+        map.put("content", "订单号:" + orders.getNumber()); //订单号
+        String json = JSON.toJSONString(map);
+
+        webSocketServer.sendToAllClient(json);
         return vo;
     }
 
@@ -494,5 +510,18 @@ public class OrderServiceImpl implements OrderService {
         orders.setDeliveryTime(LocalDateTime.now());
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public void remind(Long id) {
+        Orders order = orderMapper.getById(id);
+        //通过websocket向客户端推送json消息 type orderId content
+        Map map = new HashMap<>();
+        map.put("type", 2); //表示来电提醒
+        map.put("orderId", order.getId()); //订单id
+        map.put("content", "订单号:" + order.getNumber()); //订单号
+        String json = JSON.toJSONString(map);
+
+        webSocketServer.sendToAllClient(json);
     }
 }
