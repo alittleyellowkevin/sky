@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface OrderMapper {
@@ -45,4 +46,7 @@ public interface OrderMapper {
 
     @Update("update sky_take_out.orders set orders.status = #{orderstatus}, orders.pay_status = #{oderPaidStatus}, orders.checkout_time=#{checkoutTime} where orders.number = #{orderNumber}")
     void updateStatus(Integer orderstatus, Integer oderPaidStatus, LocalDateTime checkoutTime, String orderNumber);
+
+    @Select("select * from sky_take_out.orders where orders.status = #{status} and orders.order_time < #{orderTime}")
+    List<Orders> selecByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
 }
