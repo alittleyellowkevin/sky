@@ -66,4 +66,50 @@
         </where>
         order by order_time desc
     </select>
+
+    <select id="countOneDayAmount" resultType="java.lang.Integer">
+        select sum(amount) from sky_take_out.orders
+        <where>
+            <if test="beginTime != null">
+                and checkout_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                and checkout_time &lt;= #{endTime}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="countOneDayCount" resultType="java.lang.Integer">
+        select count(*) from sky_take_out.orders
+        <where>
+            <if test="beginTime != null">
+                and checkout_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                and checkout_time &lt;= #{endTime}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        select od.name, sum(od.number) number
+        from sky_take_out.order_detail od, sky_take_out.orders o
+        where od.order_id = o.id
+        <if test="beginTime != null">
+            and checkout_time &gt;= #{beginTime}
+        </if>
+        <if test="endTime != null">
+            and checkout_time &lt;= #{endTime}
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        group by od.name
+        order by number desc
+        limit 0, 10
+    </select>
 </mapper>

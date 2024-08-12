@@ -1,13 +1,16 @@
 package com.sky.mapper;
 
 import com.github.pagehelper.Page;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -49,4 +52,11 @@ public interface OrderMapper {
 
     @Select("select * from sky_take_out.orders where orders.status = #{status} and orders.order_time < #{orderTime}")
     List<Orders> selecByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
+
+
+    Integer countOneDayAmount(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
+
+    Integer countOneDayCount(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
+
+    List<GoodsSalesDTO> getSalesTop10(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
 }
