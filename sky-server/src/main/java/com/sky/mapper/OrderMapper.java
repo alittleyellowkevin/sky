@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Update;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -54,9 +55,23 @@ public interface OrderMapper {
     List<Orders> selecByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
 
 
-    Integer countOneDayAmount(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
+    Double countOneDayAmount(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
 
     Integer countOneDayCount(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
 
     List<GoodsSalesDTO> getSalesTop10(LocalDateTime beginTime, LocalDateTime endTime, Integer status);
+
+    /**
+     * 根据动态条件统计营业额数据
+     * @param map
+     * @return
+     */
+    Double sumByMap(Map map);
+
+    /**
+     * 根据动态条件统计订单数量
+     * @param map
+     * @return
+     */
+    Integer countByMap(Map map);
 }

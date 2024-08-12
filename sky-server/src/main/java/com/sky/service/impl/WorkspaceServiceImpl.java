@@ -31,13 +31,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private DishMapper dishMapper;
     @Autowired
     private SetmealMapper setmealMapper;
-
-    /**
-     * 根据时间段统计营业数据
-     * @param begin
-     * @param end
-     * @return
-     */
     public BusinessDataVO getBusinessData(LocalDateTime begin, LocalDateTime end) {
         /**
          * 营业额：当日已完成订单的总金额
@@ -124,8 +117,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     /**
-     * 查询菜品总览
-     *
      * @return
      */
     public DishOverViewVO getDishOverView() {
